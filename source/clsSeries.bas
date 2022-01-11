@@ -13,9 +13,6 @@ Private shtNewWorkSheet As WorkSheet
 Private iColumn As Integer
 Private bIsValidSeries As Boolean
 
-'Private tMySeries As MySeries
-
-
 Public Sub Initiate(ExcelSeries As Series, OldChart As Chart, ChartProps As MyChart)
   
   Set oSeries = ExcelSeries
@@ -64,6 +61,12 @@ Public Property Let SetNewWorksheet(NewWorkSheet As WorkSheet)
 End Property
 
 Public Sub SetNewCategoryRange()
+
+    If clsMyAxis Is Nothing Then
+        
+        Exit Sub
+    
+    End If
 
    If Not IsEmpty(clsMyAxis.GetCategoryArray(5)) Then
 
@@ -136,27 +139,7 @@ ErrorHandler:
 
 End Sub
 
-
-Public Sub PrintSeriesNumber(SeriesNumber As Integer)
-
-   Const cProc = "PrintSeriesNumber"
-   
-   On Error GoTo ErrorHandler:
-
-    Dim firstCell As Range
-    Set firstCell = shtNewWorkSheet.Cells(tChartProps.FirstCellOfOutput(1, 1), tChartProps.FirstCellOfOutput(2, 1)).Offset(5, 1 + iColumn)
-    
-    firstCell.Value = "#" & SeriesNumber
-    
-       Exit Sub
-    
-ErrorHandler:
-    
-   ErrorMod.ErrorMessage cProc, cModule
-
-End Sub
-
-Public Sub PrintSeriesName()
+Public Sub PrintSeriesName(SeriesNumber As Integer)
 
    Const cProc = "PrintSeriesName"
    
@@ -171,7 +154,16 @@ Public Sub PrintSeriesName()
     
     Call FormatRange(r)
     
-    r = arrSources(1, 3)
+    If Len(Trim(arrSources(1, 3)(1, 1))) = 0 Then
+        
+        r.Value = "#" & SeriesNumber
+    
+    Else
+        
+        r.Value = arrSources(1, 3)
+    
+    End If
+    
     r.NumberFormat = arrSources(1, 4)
         
     Exit Sub
@@ -292,6 +284,10 @@ End Property
 
 Function SplitFormula(s As Series) As Variant
 
+   Const cProc = "SplitFormula"
+   
+   On Error GoTo ErrorHandler:
+
    Dim ResultArray As Variant
    Dim Func As String
    Dim i As Integer
@@ -346,11 +342,10 @@ Function SplitFormula(s As Series) As Variant
   ' =========== Names ======================
   
    If ResultArray(1, 1) = "Range_single" Then
-       
-       arrS(1) = s.Name
-       ResultArray(1, 3) = ConvertTo2DArray(arrS)
+              
        strAddress = ResultArray(1, 2)
        Set rngR = Range(strAddress)
+       ResultArray(1, 3) = ConvertTo2DArray(rngR.Value)
        ResultArray(1, 4) = rngR.NumberFormat
   
    End If
@@ -367,10 +362,11 @@ Function SplitFormula(s As Series) As Variant
     
    If ResultArray(2, 1) = "Range_single" Then
     
-    ResultArray(2, 3) = ConvertTo2DArray(s.XValues)
     strAddress = ResultArray(2, 2)
     Set rngR = Range(strAddress)
+    ResultArray(2, 3) = ConvertTo2DArray(rngR.Value)
     ResultArray(2, 4) = rngR.NumberFormat
+    
   
   End If
     
@@ -410,9 +406,8 @@ ExitCategory:
   ' =========== Values ====================
   
   If ResultArray(3, 1) = "Range_single" Then
-
+            
     ResultArray(3, 3) = ConvertTo2DArray(s.Values)
-        
     strAddress = ResultArray(3, 2)
     Set rngR = Range(strAddress)
     ResultArray(3, 4) = rngR.NumberFormat
@@ -455,6 +450,13 @@ ExitValue:
   bIsValidSeries = True
   
   SplitFormula = ResultArray
+  
+    Exit Function
+    
+ErrorHandler:
+    
+   ErrorMod.ErrorMessage cProc, cModule
+  
  
 End Function
 
@@ -518,3 +520,4 @@ Public Sub ToString()
  
 
 End Sub
+

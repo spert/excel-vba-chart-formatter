@@ -24,8 +24,8 @@ Public Sub InitiateSettings(AWorkBook As Workbook, OldChart As Chart, Options As
    Set oOldChart = OldChart
   
  
-   aLanguage_Descriptions(0) = Array("English", "Heading:", "Series:", "Name ENG:", "Scale ENG:", "Source: ", "Sources: ", "Chart ", "<title>", "<source>", "Name and scale ENG", "Axis title left:", "Axis title right:")
-   aLanguage_Descriptions(1) = Array("Eesti keeles", "Pealkiri:", "Aegread:", "Nimi EST:", "Telg EST:", "Allikas: ", "Allikad: ", "Joonis ", "<pealkiri>", "<allikas>", "Nimi ja telg EST", "Telje pealkiri vasak:", "Telje pealkiri parem:")
+   aLanguage_Descriptions(0) = Array("English", "Title:", "", "Series name:", "Series scale:", "Source: ", "Sources: ", "Chart ", "<title>", "<source>", "Name and scale:", "Left Axis title :", "Right axis title:")
+   aLanguage_Descriptions(1) = Array("Eesti keeles", "Pealkiri:", "", "Aegrea nimi:", "Aegrea telg:", "Allikas: ", "Allikad: ", "Joonis ", "<pealkiri>", "<allikas>", "Nimi ja telg:", "Vasaku telje pealkiri:", "Parema telje pealkiri:")
    aLanguage_ScaleValidation(0) = Array("(left scale)", "(right scale)")
    aLanguage_ScaleValidation(1) = Array("(vasak telg)", "(parem telg)")
    aSeriesColors(0) = Array(RGB(223, 158, 48), RGB(190, 82, 3), RGB(44, 68, 94), RGB(46, 108, 129), RGB(100, 178, 199))
@@ -78,7 +78,7 @@ Public Function GetFormatProperties() As MyChart()
     
         ReDim Preserve aChartProps(1)
         aChartProps(0) = Language1(tChartProps)
-        aChartProps(1) = Language2(tChartProps)
+        aChartProps(1) = Language2(tChartProps, aChartProps(0))
 
     End If
     
@@ -144,25 +144,26 @@ Private Function Language1(props As MyChart) As MyChart
     tProps.Language_Descriptions = aLanguage_Descriptions(0)
     tProps.Language_ScaleValidation = aLanguage_ScaleValidation(0)
     tProps.FirstCellOfOutput = [{1;7}]
-    tProps.SeriesDataOffset = [{25;8}]
-    tProps.Top = 50 '81.0001602172852
-    tProps.Left = 25 '15.7500791549683
+    tProps.SeriesDataOffset = [{10;8}]
+    tProps.Top = 50
+    tProps.Left = 25
       
     Language1 = tProps
     
 End Function
 
-Private Function Language2(props As MyChart) As MyChart
+Private Function Language2(props As MyChart, props1 As MyChart) As MyChart
 
    Dim tProps As MyChart
    tProps = props
 
     tProps.Language_Descriptions = aLanguage_Descriptions(1)
     tProps.Language_ScaleValidation = aLanguage_ScaleValidation(1)
-    tProps.FirstCellOfOutput = [{12;7}]
-    tProps.SeriesDataOffset = [{25;8}]
-    tProps.Top = 470 '81.0001602172852
-    tProps.Left = 25 '15.7500791549683
+    tProps.FirstCellOfOutput = [{9;7}]
+    tProps.Top = props1.Top + props1.Height + 20
+    tProps.Left = props1.Left
+    tProps.SeriesDataOffset = [{18;8}]
+    props1.SeriesDataOffset = [{18;8}]
           
     Language2 = tProps
 
@@ -432,7 +433,7 @@ Private Function LargeChartSize(props As MyChart) As MyChart
     If NumberOfYAxisTitles = 0 Then
     
         tProps.PlotArea.Size.Left = 0
-        tProps.PlotArea.Size.With = tProps.With
+        tProps.PlotArea.Size.With = tProps.With - 10
         
     ElseIf NumberOfYAxisTitles = 1 Then
     
@@ -471,14 +472,3 @@ Private Function NumberOfYAxisTitles() As Integer
 
 End Function
 
-'TODO:
-'Private Function RescaleXAxis(props As MyChart) As MyChart
-'
-'    Dim tProps As MyChart
-'    tProps = props
-'
-'    tProps.RescaleXAxis = True
-'
-'    RescaleXAxis = tProps
-'
-'End Function

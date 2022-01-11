@@ -81,6 +81,18 @@ ErrorHandler:
 
 End Function
 
+Public Function IsEmptyAxis() As Boolean
+
+   IsEmptyAxis = False
+
+    If arrCat(1) = "Empty" Then
+    
+       IsEmptyAxis = True
+    
+    End If
+
+End Function
+
 Property Get GetCategoryArray() As Variant
 
     GetCategoryArray = arrCat
@@ -200,5 +212,6 @@ ErrorHandler:
 
 
 End Sub
+
 
 

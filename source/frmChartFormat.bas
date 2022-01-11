@@ -78,13 +78,14 @@ Private Sub Execute(Properties As MyChart)
     ' -------- Initiate Chart Formatting --------------------
     Dim ChtFormat As New clsChart
     Call ChtFormat.InitiateChartFormat(oChtOb.Chart, Properties)
-    Call ChtFormat.CollectSeries
-    Call ChtFormat.CollectAxes
     Call ChtFormat.ValidateExcelChart
         
     If ErrorMod.GetErrorCount > 0 Then
         Exit Sub
     End If
+        
+    Call ChtFormat.CollectSeries
+    Call ChtFormat.CollectAxes
     
     ' --------- Format Worksheet Layout ------------
     Dim NewWorkSheet As New clsWorkSheet
@@ -98,8 +99,7 @@ Private Sub Execute(Properties As MyChart)
     Call ChtFormat.AssignNewRanges
     Call ChtFormat.CopyOldChartToNewWorksheet
     Call ChtFormat.MapNewSeries
-    'Call ChtFormat.MapHeadingAndSource
-        
+         
     Call ChtFormat.PrintChartTitle
     Call ChtFormat.PrintLegend
     Call ChtFormat.PrintPlotArea
@@ -107,8 +107,7 @@ Private Sub Execute(Properties As MyChart)
     Call ChtFormat.PrintChartAxisTitle
     
     Call ChtFormat.ApplySeriesFormat
-    'Call ChtFormat.ChartTextBoxes
-    Call ChtFormat.ChartAxes
+    Call ChtFormat.PrintChartAxes
 
     ' --------- Format Axes Layout ------------
     If chkRescale.Value = True Then

@@ -2,7 +2,7 @@
 Option Explicit
 
 Dim frmCht As frmChartFormat
-
+Const cModule = "modToolbar"
 
 Sub CreateMyMenu()
     
@@ -30,42 +30,38 @@ End Sub
  
 Private Sub OpenUSerForm()
 
+   Const cProc = "OpenUSerForm"
+
    On Error GoTo ErrorHandler
-   
-   Dim frmError As frmMessage
-    
+
     Dim wbW As Workbook
     Set wbW = ActiveWorkBook
 
     If wbW Is Nothing Then
 
-        Set frmError = New frmMessage
-        frmError.SetErrorMessage = "@Open an Excel workbook first!"
-        frmError.Show
-        Exit Sub
+       Err.Raise Number:=9999, Description:="@Open an Excel workbook first!"
         
     End If
-    
-'    If wbW.Saved = False Then
-'
-'        Set frmError = New frmMessage
-'        frmError.SetErrorMessage = "@Save the active Excel workbook first!"
-'        frmError.Show
-'        Exit Sub
-'
-'    End If
 
-    wbW.Save
+    If wbW.ReadOnly Then
+    
+      Err.Raise Number:=9999, Description:="@Read only Excel files are not permitted!"
+      
+    End If
+    
+    If wbW.Saved = False Then
+    
+      wbW.Save
+    
+    End If
+    
     
     Dim oChtOb As ChartObject
     Set oChtOb = GetChartObject(Selection)
 
     If oChtOb Is Nothing Then
     
-        Set frmError = New frmMessage
-        frmError.SetErrorMessage = "@Select a chart first to be formatted!"
-        frmError.Show
-        Exit Sub
+        Err.Raise Number:=9999, Description:="@Select a chart first to be formatted!"
     
     Else
     
@@ -76,14 +72,19 @@ Private Sub OpenUSerForm()
     End If
     
     
-    
 Exit Sub
     
 ErrorHandler:
 
-MsgBox Err.Description
+  ErrorMod.ErrorMessage cProc, cModule
+  
+   Dim frmError As frmMessage
+   Set frmError = New frmMessage
+   frmError.SetErrorMessage = ErrorMod.GetErrorMessages
+   frmError.Show
     
 End Sub
+
 
 
 

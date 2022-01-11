@@ -114,7 +114,12 @@ Public Sub CollectAxes()
 
     Set clsMyAxis = New clsAxes
     Call clsMyAxis.Initialize(arrCat, tChartProps)
-    'Call clsMyAxis.ToString(i)
+    
+    If clsMyAxis.IsEmptyAxis() Then
+    
+      GoTo NextIteration
+    
+    End If
 
     Dim axisFound As Boolean
     axisFound = False
@@ -148,6 +153,9 @@ Public Sub CollectAxes()
       End If
 
     End If
+
+NextIteration:
+
 
   Next
   
@@ -232,10 +240,10 @@ End Sub
 Public Sub PrintChartAxisTitle()
 
     Dim rngLeftAxisTitle As Range
-    Set rngLeftAxisTitle = shtNewWorkSheet.Cells(tChartProps.FirstCellOfOutput(1, 1), tChartProps.FirstCellOfOutput(2, 1)).Offset(9, 1)
+    Set rngLeftAxisTitle = shtNewWorkSheet.Cells(tChartProps.FirstCellOfOutput(1, 1), tChartProps.FirstCellOfOutput(2, 1)).Offset(4, 1)
     
     Dim rngRightAxisTitle As Range
-    Set rngRightAxisTitle = shtNewWorkSheet.Cells(tChartProps.FirstCellOfOutput(1, 1), tChartProps.FirstCellOfOutput(2, 1)).Offset(10, 1)
+    Set rngRightAxisTitle = shtNewWorkSheet.Cells(tChartProps.FirstCellOfOutput(1, 1), tChartProps.FirstCellOfOutput(2, 1)).Offset(5, 1)
 
     Dim ax As axis
             
@@ -284,13 +292,19 @@ End Sub
 
 Public Sub AssignNewRanges()
 
-   Const cProc = "AssignNewRanges"
+   Const cProc = "AssignNewRangesToAxes"
    
    Dim iColumn As Integer, i As Integer
    
    On Error GoTo ErrorHandler:
+   
+   If IsEmpty(arrMyAxes) = True Then
+   
+        GoTo NoAxesAvailable
+   
+   End If
 
-  '  ================ Assign New Range To Axis ==============
+
    iColumn = 0
 
    For i = 1 To UBound(arrMyAxes)
@@ -299,15 +313,13 @@ Public Sub AssignNewRanges()
         arrMyAxes(i).SetNewWorksheet = shtNewWorkSheet
         Call arrMyAxes(i).SetNewCategoryRange
         Call arrMyAxes(i).PrintCategoryValues
-                
-        'Call arrMyAxes(i).ToString(i)
         
         iColumn = iColumn + 1
 
    Next
       
+NoAxesAvailable:
 
-  ' ================ Assign New Range To Series ==============
    For i = 1 To UBound(arrMySeries)
 
     arrMySeries(i).SetColumn = iColumn
@@ -317,10 +329,9 @@ Public Sub AssignNewRanges()
     Call arrMySeries(i).SetNewNameRange
     Call arrMySeries(i).SetNewNameLinkRange
     
-    Call arrMySeries(i).PrintSeriesName
+    Call arrMySeries(i).PrintSeriesName(i)
     Call arrMySeries(i).PrintSeriesNameLink
     Call arrMySeries(i).PrintSeriesValues
-    Call arrMySeries(i).PrintSeriesNumber(i)
     Call arrMySeries(i).PrintSeriesScale(bMultipleAxesGroups)
 
     iColumn = iColumn + 1
@@ -392,18 +403,35 @@ Public Sub ApplySeriesFormat()
        Dim serS As Series
        Set serS = oNewChart.Chart.SeriesCollection(i)
        
-       If serS.ChartType = xlLine Then
-            serS.Format.Line.Weight = tChartProps.SeriesWeight
-       Else
-           serS.Format.Line.Weight = 1
-      End If
+       serS.MarkerStyle = -4142
        
-        If i <= UBound(tChartProps.SeriesColor) Then
-            serS.Format.Line.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
-            serS.Format.Fill.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
-        Else
+       If IsLineChart(serS.ChartType) Then
+       
+            If i <= UBound(tChartProps.SeriesColor) Then
+       
+                serS.Format.Line.Weight = tChartProps.SeriesWeight
+                serS.Format.Line.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
+                serS.Format.Fill.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
+                            
+            End If
+            
+            serS.Format.Line.Weight = tChartProps.SeriesWeight
+          
+       ElseIf IsColumnBarAreaChart(serS.ChartType) Then
+            
+            serS.Format.Line.Weight = 1
+       
+             If i <= UBound(tChartProps.SeriesColor) Then
+                     
+                serS.Format.Line.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
+                serS.Format.Fill.ForeColor.RGB = tChartProps.SeriesColor(i - 1)
+                
+            End If
+       
             serS.Format.Line.ForeColor.RGB = serS.Fill.ForeColor.RGB
-        End If
+       
+       End If
+       
              
    Next
 
@@ -437,9 +465,10 @@ ErrorHandler:
 
 End Sub
 
-Public Sub ChartAxes()
+Public Sub PrintChartAxes()
 
-Const cProc = "ChartAxes"
+
+Const cProc = "PrintChartAxes"
 
 On Error GoTo ErrorHandler:
 
@@ -456,6 +485,7 @@ For Each ax In oNewChart.Chart.Axes
         ax.MajorGridlines.Format.Line.ForeColor.RGB = RGB(191, 191, 191)
         ax.MajorGridlines.Format.Line.Weight = 0.25
         ax.TickLabelPosition = xlTickLabelPositionNextToAxis
+        ax.CrossesAt = -99999
         'ax.TickLabels.NumberFormat = "# ##0.0"
     
     End If
@@ -465,7 +495,7 @@ For Each ax In oNewChart.Chart.Axes
         ax.HasMajorGridlines = False
         ax.HasMinorGridlines = False
         ax.TickLabelPosition = xlTickLabelPositionNextToAxis
-        ax.TickLabels.NumberFormat = "# ##0.0"
+        'ax.TickLabels.NumberFormat = "# ##0.0"
     End If
     
     If ax.Type = xlSeriesAxis Then
@@ -480,7 +510,7 @@ For Each ax In oNewChart.Chart.Axes
         ax.Format.Fill.Transparency = 0
         ax.Format.Fill.Solid
         ax.TickLabelPosition = xlLow
-        ax.TickLabelSpacing = 1
+        'ax.TickLabelSpacing =
     
     End If
     
@@ -498,7 +528,7 @@ For Each ax In oNewChart.Chart.Axes
         ax.Format.Fill.Transparency = 0
         ax.Format.Fill.Solid
         ax.TickLabelPosition = xlLow
-        ax.TickLabelSpacing = 1
+        'ax.TickLabelSpacing = 1
         
     End If
     
@@ -661,28 +691,32 @@ Public Sub Rescale()
         Dim ax As axis
         Set ax = oNewChart.Chart.Axes(xlCategory, xlPrimary)
              
-        For i = 1 To UBound(arrMySeries)
-        
-           If arrMySeries(i).GetSeriesAxisGroup = XlAxisGroup.xlPrimary Then
-        
-               Call arrMySeries(i).GetSeriesAxis.Rescale
-               tNewDateScale = arrMySeries(i).GetSeriesAxis.GetMyNewDateScale
-
-               If tNewDateScale.Rescaled = True Then
-
-                   ax.MinimumScale = tNewDateScale.MinDate
-                   ax.MaximumScale = tNewDateScale.MaxDate
-                   ax.MajorUnit = tNewDateScale.MajorUnit
-                   ax.MajorUnitScale = tNewDateScale.MajorUnitScale
-                   ax.BaseUnit = tNewDateScale.BaseUnit
-                   ax.TickLabels.NumberFormat = tNewDateScale.FormatCode
-
-               End If
-
+        If IsDateAxis(ax) Then
+             
+            For i = 1 To UBound(arrMySeries)
             
-           End If
-                                        
-        Next
+               If arrMySeries(i).GetSeriesAxisGroup = XlAxisGroup.xlPrimary Then
+            
+                   Call arrMySeries(i).GetSeriesAxis.Rescale
+                   tNewDateScale = arrMySeries(i).GetSeriesAxis.GetMyNewDateScale
+    
+                   If tNewDateScale.Rescaled = True Then
+    
+                       ax.MinimumScale = tNewDateScale.MinDate
+                       ax.MaximumScale = tNewDateScale.MaxDate
+                       ax.MajorUnit = tNewDateScale.MajorUnit
+                       ax.MajorUnitScale = tNewDateScale.MajorUnitScale
+                       ax.BaseUnit = tNewDateScale.BaseUnit
+                       ax.TickLabels.NumberFormat = tNewDateScale.FormatCode
+    
+                   End If
+    
+                
+               End If
+                                            
+            Next
+        
+        End If
     
     End If
        
@@ -695,21 +729,4 @@ ErrorHandler:
     
 
 End Sub
-
-
-'If oNewChart.HasAxis(xlValue, xlPrimary) = True Then
-'
-'    Dim ax As axis
-'    Set ax = oNewChart.HasAxis(xlValue, xlPrimary)
-'
-'    If ax.CategoryType = xlTimeScale Then
-'
-'      Dim tMyNewAxis As MyNewDateScale
-'      tMyNewAxis = CalculateNewDateSpan(tMyOldAxis)
-'
-'    End If
-'
-'End If
-
-
 

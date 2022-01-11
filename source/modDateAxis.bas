@@ -52,7 +52,7 @@ Public Function CalculateNewScale(arrDates As Variant) As MyNewDateScale
             tAxis.MaxDate = WorksheetFunction.EoMonth(d2, 0)
             tAxis.MajorUnit = 1
             tAxis.MajorUnitScale = XlTimeUnit.xlMonths
-            tAxis.BaseUnit = XlTimeUnit.xlDays
+            tAxis.BaseUnit = XlTimeUnit.xlMonths
             tAxis.FormatCode = "mm.yyyy"
             CalculateNewScale = tAxis
             Exit Function
@@ -64,7 +64,7 @@ Public Function CalculateNewScale(arrDates As Variant) As MyNewDateScale
             tAxis.MaxDate = WorksheetFunction.EoMonth(d2, 0)
             tAxis.MajorUnit = 3
             tAxis.MajorUnitScale = XlTimeUnit.xlMonths
-            tAxis.BaseUnit = XlTimeUnit.xlDays
+            tAxis.BaseUnit = XlTimeUnit.xlMonths
             tAxis.FormatCode = "mm.yyyy"
             CalculateNewScale = tAxis
             Exit Function
@@ -76,8 +76,8 @@ Public Function CalculateNewScale(arrDates As Variant) As MyNewDateScale
             tAxis.MaxDate = WorksheetFunction.EoMonth(d2, 0)
             tAxis.MajorUnit = 4
             tAxis.MajorUnitScale = XlTimeUnit.xlMonths
-            tAxis.BaseUnit = XlTimeUnit.xlDays
-            tAxis.FormatCode = "yyyy"
+            tAxis.BaseUnit = XlTimeUnit.xlMonths
+            tAxis.FormatCode = "mm.yyyy"
             CalculateNewScale = tAxis
             Exit Function
        End If
@@ -181,3 +181,4 @@ Public Function GetFrequencyFromTowDates(d1 As Date, d2 As Date) As MyFrequency
     
 
 End Function
+

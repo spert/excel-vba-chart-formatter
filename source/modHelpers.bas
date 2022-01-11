@@ -3,21 +3,151 @@ Option Explicit
 
 Public Function ConvertTo2DArray(DoubleInput As Variant) As Variant
 
-  Dim i As Integer, j As Integer
+  Dim i As Integer, j As Integer, x As Integer, y As Integer
   Dim arrResult() As Variant
-  ReDim Preserve arrResult(1 To UBound(DoubleInput) - LBound(DoubleInput) + 1, 1 To 1)
-  j = 1
   
-  For i = LBound(DoubleInput) To UBound(DoubleInput)
+  If Not IsArray(DoubleInput) Then
   
-    arrResult(j, 1) = DoubleInput(i)
-    j = j + 1
+    ReDim Preserve arrResult(1 To 1, 1 To 1)
     
-  Next
+    arrResult(1, 1) = DoubleInput
+  
+    ConvertTo2DArray = arrResult
+    
+    Exit Function
+  
+  End If
+   
+  x = UBound(DoubleInput, 1) - LBound(DoubleInput, 1) + 1
+  
+  On Error Resume Next
+  
+  y = UBound(DoubleInput, 2) - LBound(DoubleInput, 2) + 1
+  
+  
+  
+  If (x > 0 And y = 1) Then
+
+         arrResult = DoubleInput
+   
+     ConvertTo2DArray = arrResult
+
+     Exit Function
+
+  End If
+   
+   
+  If (x > 0 And y = 0) Or x = y Then
+  
+     ReDim Preserve arrResult(1 To x, 1 To 1)
+
+     For i = 1 To x
+
+         arrResult(i, 1) = DoubleInput(i)
+
+     Next
+
+     ConvertTo2DArray = arrResult
+
+     Exit Function
+
+  End If
+ 
+
+ If x = 1 And y > 0 Then
+
+    ReDim Preserve arrResult(1 To y, 1 To 1)
+
+    For i = 1 To y
+
+         arrResult(i, 1) = DoubleInput(1, i)
+
+    Next
+
+    ConvertTo2DArray = arrResult
+
+    Exit Function
+
+ End If
 
   ConvertTo2DArray = arrResult
 
 End Function
+
+Function IsDateAxis(ax As axis) As Boolean
+    
+    Dim typ As Long
+    
+    typ = -1
+    
+    On Error Resume Next
+    
+    typ = ax.MajorUnitScale
+    
+    On Error GoTo 0
+    
+    IsDateAxis = (typ > -1)
+
+End Function
+
+Function IsLineChart(ChartType As XlChartType) As Boolean
+       
+   Dim lineChart(10) As Integer
+   lineChart(1) = 4
+   lineChart(2) = 65
+   lineChart(3) = 66
+   lineChart(4) = 67
+   lineChart(5) = 63
+   lineChart(6) = 64 '
+ 
+   Dim i As Integer
+ 
+   For i = 1 To UBound(lineChart)
+   
+        If ChartType = lineChart(i) Then
+            
+            IsLineChart = True
+            Exit Function
+        
+        End If
+   
+   Next
+   
+   IsLineChart = False
+
+End Function
+
+Function IsColumnBarAreaChart(ChartType As XlChartType) As Boolean
+       
+   Dim columnChart(10) As Integer
+   columnChart(1) = 51
+   columnChart(2) = 52
+   columnChart(3) = 53
+   columnChart(4) = 57
+   columnChart(5) = 58
+   columnChart(7) = 1
+   columnChart(8) = 76
+   columnChart(9) = 77
+   columnChart(10) = 59
+ 
+   Dim i As Integer
+ 
+   For i = 1 To UBound(columnChart)
+   
+        If ChartType = columnChart(i) Then
+            
+            IsColumnBarAreaChart = True
+            Exit Function
+        
+        End If
+   
+   Next
+   
+   IsColumnBarAreaChart = False
+
+End Function
+
+
 
 
 Public Sub FormatRange(MyRange As Range)
@@ -247,12 +377,4 @@ Function SERIESFUNC(Optional n, Optional cat, Optional Vals, Optional order, Opt
     SERIESFUNC = result
 
 End Function
-
-
-'Public Function CalculateNewDateSpan(DateAxis As MyNewDateScale) As MyNewDateScale
-'
-'    'TODO: rescaling not implemented jet
-'
-'
-'End Function
 

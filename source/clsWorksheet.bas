@@ -91,25 +91,27 @@ Public Sub PrintHeaders()
     rOut.Offset(1, 0).Value = tChartProps.Language_Descriptions(0)
     rOut.Offset(2, 0).Value = tChartProps.Language_Descriptions(1)
     rOut.Offset(3, 0).Value = tChartProps.Language_Descriptions(5)
+    rOut.Offset(4, 0).Value = tChartProps.Language_Descriptions(11)
+    rOut.Offset(5, 0).Value = tChartProps.Language_Descriptions(12)
     
-    rOut.Offset(5, 0).Value = tChartProps.Language_Descriptions(2)
+    'rOut.Offset(6, 0).Value = tChartProps.Language_Descriptions(2)
     rOut.Offset(6, 0).Value = tChartProps.Language_Descriptions(3)
     rOut.Offset(7, 0).Value = tChartProps.Language_Descriptions(4)
     rOut.Offset(8, 0).Value = tChartProps.Language_Descriptions(10)
-    rOut.Offset(9, 0).Value = tChartProps.Language_Descriptions(11)
-    rOut.Offset(10, 0).Value = tChartProps.Language_Descriptions(12)
         
     rOut.Offset(2, 1).Resize(1, 4).Merge
     rOut.Offset(3, 1).Resize(1, 4).Merge
-    
-    rOut.Offset(1, 0).Resize(11, 7).Borders(xlEdgeRight).LineStyle = xlContinuous
-    rOut.Offset(1, 0).Resize(11, 7).Borders(xlEdgeTop).LineStyle = xlContinuous
-    rOut.Offset(1, 0).Resize(11, 7).Borders(xlEdgeLeft).LineStyle = xlContinuous
-    rOut.Offset(1, 0).Resize(11, 7).Borders(xlEdgeBottom).LineStyle = xlContinuous
+    rOut.Offset(4, 1).Resize(1, 4).Merge
+    rOut.Offset(5, 1).Resize(1, 4).Merge
     
     Call FormatRange(rOut.Offset(2, 1).Resize(1, 4))
     Call FormatRange(rOut.Offset(3, 1).Resize(1, 4))
+    Call FormatRange(rOut.Offset(4, 1).Resize(1, 4))
+    Call FormatRange(rOut.Offset(5, 1).Resize(1, 4))
     
+    rOut.Offset(1, 0).Resize(8, 7).Borders(xlEdgeTop).LineStyle = xlContinuous
+    rOut.Offset(1, 0).Resize(8, 7).Borders(xlEdgeBottom).LineStyle = xlContinuous
+        
     If tChartProps.Title.Text <> "" Then
     
          rOut.Offset(2, 1).Value = tChartProps.Title.Text
@@ -134,3 +136,4 @@ ErrorHandler:
    ErrorMod.ErrorMessage cProc, cModule
 
 End Sub
+
