@@ -1,6 +1,5 @@
 
-Option Explicit
-
+Option Explicit On
 
 Private Sub btnClose_Click()
 
@@ -8,22 +7,28 @@ Private Sub btnClose_Click()
 
 End Sub
 
+
 Property Let SetErrorMessage(sErrMessage As String)
 
    lstErrors.Clear
 
    Dim i As Integer
-    
-   Dim aErrors() As String
-   aErrors = Split(sErrMessage, "@")
-        
-           
-    For i = 1 To UBound(aErrors)
-            
-            lstErrors.AddItem aErrors(i)
-            
+
+Dim aErrors() As String
+aErrors = Split(sErrMessage, "@")
+
+
+For i = 1 To UBound(aErrors)
+
+lstErrors.AddItem aErrors(i)
+
     Next
-  
+
 
 End Property
 
+Private Sub UserForm_Terminate()
+
+    Call ErrorMod.ResetErrorCounter
+
+End Sub
