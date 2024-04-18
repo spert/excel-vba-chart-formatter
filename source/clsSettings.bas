@@ -32,13 +32,11 @@ Public Sub InitiateSettings(AWorkBook As Workbook, OldChart As Chart, Options As
 
 End Sub
 
-Public Function GetFormatProperties() As MyChart()
-
-    Dim aChartProps() As MyChart
+Public Function GetFormatChartProps() As MyChart
 
     '====== Worksheet
     Dim tChartProps As MyChart
-    tChartProps = WorksheetPoperties(tChartProps)
+    '    tChartProps = WorksheetPoperties(tChartProps)
 
     '======= Number of Axis Titles (NB! order matters)
     tChartProps = NumberOfAxesTitles(tChartProps)
@@ -63,14 +61,46 @@ Public Function GetFormatProperties() As MyChart()
 
     End If
 
+    tChartProps = Language1(tChartProps)
 
-    '====== Rescale X Axis (NOT IMPLEMENTED)
-    '    If aOptions(5) Then
-    '
-    '        tChartProps = RescaleXAxis(tChartProps)
-    '
-    '    End If
+    GetFormatChartProps = tChartProps
 
+End Function
+
+
+Public Function GetCopyChartProps() As MyChart()
+
+    Dim aChartProps() As MyChart
+
+    '====== Worksheet
+    Dim tChartProps As MyChart
+    '    tChartProps = WorksheetPoperties(tChartProps)
+
+    '======= Copy as links
+    tChartProps.CopyValuesAsLinks = aOptions(7)
+
+    '======= Number of Axis Titles (NB! order matters)
+    tChartProps = NumberOfAxesTitles(tChartProps)
+
+    '======= Title text
+    tChartProps = TitleText(tChartProps)
+
+    ' ====== Series Colors
+    tChartProps = SeriesColorsAndWeight(tChartProps)
+
+    '====== Small chart
+    If aOptions(0) Then
+
+        tChartProps = SmallAxisTitle(SmallChartSourceBox(SmallChartTitle(SmallChartLegend(SmallChartSize(tChartProps)))))
+
+    End If
+
+    '====== Slide chart
+    If aOptions(1) Then
+
+        tChartProps = LargeAxisTitle(LargeChartSourceBox(LargeChartTitle(LargeChartLegend(LargeChartSize(tChartProps)))))
+
+    End If
 
     '====== 1 Language
     If aOptions(2) Then
@@ -89,44 +119,7 @@ Public Function GetFormatProperties() As MyChart()
 
     End If
 
-    GetFormatProperties = aChartProps
-
-End Function
-
-Private Function WorksheetPoperties(props As MyChart) As MyChart
-
-    Dim tProps As MyChart
-    tProps = props
-
-    Dim wb As Workbook
-
-    Dim sht As Worksheet
-
-    Dim i As Integer
-
-    i = 0
-
-    If wb Is Nothing Then Set wb = ActiveWorkBook
-    
-    Do
-        i = i + 1
-        
-        Set sht = Nothing
-    
-        On Error Resume Next
-
-        Dim s As String
-        s = CStr(i)
-        
-        Set sht = wb.Sheets(s)
-                
-        On Error GoTo 0
-
-    Loop Until sht Is Nothing
-
-    tProps.SheetName = CStr(i)
-
-    WorksheetPoperties = tProps
+    GetCopyChartProps = aChartProps
 
 End Function
 
@@ -154,6 +147,7 @@ Private Function Language1(props As MyChart) As MyChart
     tProps.SeriesDataOffset = [{10;8}]
     tProps.Top = 50
     tProps.Left = 25
+    tProps.PrintAxesAndValues = True
 
     Language1 = tProps
 
@@ -170,8 +164,9 @@ Private Function Language2(props As MyChart, props1 As MyChart) As MyChart
     tProps.Top = props1.Top + props1.Height + 20
     tProps.Left = props1.Left
     tProps.SeriesDataOffset = [{18;8}]
+    tProps.PrintAxesAndValues = False
     props1.SeriesDataOffset = [{18;8}]
-          
+              
     Language2 = tProps
 
 End Function
@@ -341,9 +336,8 @@ Private Function TitleText(props As MyChart) As MyChart
     Set sh = oOldChart.Shapes("ChartFormatterTitleBox")
             
     If Not sh Is Nothing Then
-
         tProps.Title.Text = sh.TextFrame2.TextRange.Text
-
+        sh.Delete
     End If
 
     If tProps.Title.Text = "" Then
@@ -370,20 +364,19 @@ Private Function SmallChartSourceBox(props As MyChart) As MyChart
     Set sh = oOldChart.Shapes("ChartFormatterSourceBox")
             
     If Not sh Is Nothing Then
-
         tProps.SourceTextBox.Text = sh.TextFrame2.TextRange.Text
-
     End If
 
     If aOptions(6) = True Then
         tProps.SourceTextBox.Position = MyPosition.Bottom
-        tProps.SourceTextBox.Font.Name = "Calibri"
-        tProps.SourceTextBox.Font.Size = 10
-        tProps.SourceTextBox.Font.Bold = False
-        tProps.SourceTextBox.Font.RGB = RGB(0, 0, 0)
     Else
         tProps.SourceTextBox.Position = MyPosition.None
     End If
+
+    tProps.SourceTextBox.Font.Name = "Calibri"
+    tProps.SourceTextBox.Font.Size = 10
+    tProps.SourceTextBox.Font.Bold = False
+    tProps.SourceTextBox.Font.RGB = RGB(0, 0, 0)
 
     SmallChartSourceBox = tProps
 
@@ -402,20 +395,19 @@ Private Function LargeChartSourceBox(props As MyChart) As MyChart
     Set sh = oOldChart.Shapes("ChartFormatterSourceBox")
             
     If Not sh Is Nothing Then
-
         tProps.SourceTextBox.Text = sh.TextFrame2.TextRange.Text
-
     End If
 
     If aOptions(6) = True Then
         tProps.SourceTextBox.Position = MyPosition.Bottom
-        tProps.SourceTextBox.Font.Name = "Calibri"
-        tProps.SourceTextBox.Font.Size = 14
-        tProps.SourceTextBox.Font.Bold = False
-        tProps.SourceTextBox.Font.RGB = RGB(0, 0, 0)
     Else
         tProps.SourceTextBox.Position = MyPosition.None
     End If
+
+    tProps.SourceTextBox.Font.Name = "Calibri"
+    tProps.SourceTextBox.Font.Size = 14
+    tProps.SourceTextBox.Font.Bold = False
+    tProps.SourceTextBox.Font.RGB = RGB(0, 0, 0)
 
     LargeChartSourceBox = tProps
 
@@ -431,252 +423,103 @@ Private Function SmallChartSize(props As MyChart) As MyChart
     tProps.With = 215.499921259843
     tProps.ColumnWith = 8.43
 
-    Dim aVert(11, 2) As Variant
-    aVert(0, 0) = 0  'marging to separate chart border and title (% of chart total height)
-    aVert(1, 0) = 10 'title relative height (% of chart total height)
-    aVert(2, 0) = 2  'marging to separate title and legend (% of chart total height)
-    aVert(3, 0) = 10 'legend height (% of chart total height)
-    aVert(4, 0) = 0  'marging to separate legend and axis title on bottom (% of chart total height)
-    aVert(5, 0) = 5  'axis title on top plot area(% of chart total height)
-    aVert(6, 0) = 59 'plot area relative height (% of chart total height)
-    aVert(7, 0) = 5  'axis title on bottom of plot area (% of chart total height)
-    aVert(8, 0) = 0  'marging to separate plot area and source box (% of chart total height)
-    aVert(9, 0) = 7  'source box height (% of chart total height)
-    aVert(10, 0) = 3 'marging to separate source box chart border (% of chart total height)
-
     tProps.Title.Position = MyPosition.Top
     tProps.SourceTextBox.TextAlignment = msoAlignLeft
 
+    tProps.PlotArea.Size.Top = 8
+    tProps.PlotArea.Size.Height = 233
+
     'title missing
     If aOptions(4) = False Then
-        aVert(0, 0) = 0
-        aVert(1, 0) = 0
         tProps.Title.Position = MyPosition.None
+        tProps.Title.Size.Height = 0
+
+        'legend
+        If oOldChart.HasLegend = True Then
+            tProps.Legend.Size.Top = 2
+            tProps.Legend.Size.Height = 50
+            tProps.PlotArea.Size.Top = 50
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 45
+        Else
+            tProps.PlotArea.Size.Top = 10
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 10
+        End If
+
     End If
 
-    'title not in text box
+    'title present but not in text box
     If aOptions(4) = True And aOptions(5) = False Then
-        aVert(0, 0) = 2
-        aVert(1, 0) = 5
-    End If
 
-    'legend
-    If oOldChart.HasLegend = False Then
-        aVert(2, 0) = 0
-        aVert(3, 0) = 0
-    End If
+        tProps.Title.Position = MyPosition.Top
+        tProps.Title.Size.Top = 2
+        tProps.Title.Size.Height = 20
 
-    'source
-    If aOptions(6) = False Then
-        aVert(8, 0) = 0
-        aVert(9, 0) = 0
-    End If
-
-    aVert(5, 0) = aVert(5, 0) * tProps.NumberOfAxesTitles(2)
-    aVert(7, 0) = aVert(7, 0) * tProps.NumberOfAxesTitles(3)
-
-    aVert(0, 1) = aVert(0, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(1, 1) = aVert(1, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(2, 1) = aVert(2, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(3, 1) = aVert(3, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(4, 1) = aVert(4, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(5, 1) = aVert(5, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(6, 1) = aVert(6, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(7, 1) = aVert(7, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(8, 1) = aVert(8, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(9, 1) = aVert(9, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(10, 1) = aVert(10, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-
-    aVert(1, 2) = aVert(0, 1) 'title
-    aVert(3, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1)  'legend
-    aVert(6, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1) + aVert(3, 1) + aVert(4, 1) + aVert(5, 1)  'plot area
-    aVert(9, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1) + aVert(3, 1) + aVert(4, 1) + aVert(5, 1) + aVert(6, 1) + aVert(7, 1) + aVert(8, 1) 'source
-
-    ' ----------------- HEIGHT --------------------
-    tProps.Title.Size.Height = tProps.Height * aVert(1, 1) / 100
-    tProps.Legend.Size.Height = tProps.Height * aVert(3, 1) / 100
-    tProps.PlotArea.Size.Height = tProps.Height * aVert(6, 1) / 100
-    tProps.SourceTextBox.Size.Height = tProps.Height * aVert(9, 1) / 100
-
-    ' ----------------- TOP --------------------
-    tProps.Title.Size.Top = tProps.Height * aVert(1, 2) / 100
-    tProps.Legend.Size.Top = tProps.Height * aVert(3, 2) / 100
-    tProps.PlotArea.Size.Top = tProps.Height * aVert(6, 2) / 100
-    tProps.SourceTextBox.Size.Top = tProps.Height * aVert(9, 2) / 100
-
-    Dim aHoriz(14, 2) As Variant
-    aHoriz(0, 0) = 0  'marging to separate chart title form left border (% of chart total with)
-    aHoriz(1, 0) = 100  'title relative with (% of chart total with)
-    aHoriz(2, 0) = 0  'marging to separate title from right border (% of chart total with)
-
-    aHoriz(3, 0) = 1   'marging to separate legend from left border (% of chart total with)
-    aHoriz(4, 0) = 98  'legend with (% of chart total with)
-    aHoriz(5, 0) = 8  'marging to separate legend from right border (% of chart total with)
-
-    aHoriz(6, 0) = 1   'marging to separate axis title on left border(% of chart total with)
-    aHoriz(7, 0) = 6   'marging to separate axis title from plot area (% of chart total with)
-    aHoriz(8, 0) = 91  'plot area with (% of chart total with)
-    aHoriz(9, 0) = 6   'marging to separate plot area from axis title (% of chart total with)
-    aHoriz(10, 0) = 5   'marging to separate axis title on left border(% of chart total with)
-
-    aHoriz(11, 0) = 1  'marging to separate legend from left border (% of chart total with)
-    aHoriz(12, 0) = 98 'legend with (% of chart total with)
-    aHoriz(13, 0) = 1  'marging to separate legend from right border (% of chart total with)
-
-    aHoriz(7, 0) = aHoriz(7, 0) * tProps.NumberOfAxesTitles(0)
-    aHoriz(9, 0) = aHoriz(9, 0) * tProps.NumberOfAxesTitles(1)
-
-    aHoriz(0, 1) = aHoriz(0, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-    aHoriz(1, 1) = aHoriz(1, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-    aHoriz(2, 1) = aHoriz(2, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-
-    aHoriz(3, 1) = aHoriz(3, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0)) * 100
-    aHoriz(4, 1) = aHoriz(4, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0)) * 100
-    aHoriz(5, 1) = aHoriz(5, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0)) * 100
-
-    aHoriz(6, 1) = aHoriz(6, 0) / (aHoriz(6, 0) + aHoriz(7, 0) + aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(7, 1) = aHoriz(7, 0) / (aHoriz(6, 0) + aHoriz(7, 0) + aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(8, 1) = aHoriz(8, 0) / (aHoriz(6, 0) + aHoriz(7, 0) + aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(9, 1) = aHoriz(9, 0) / (aHoriz(6, 0) + aHoriz(7, 0) + aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(10, 1) = aHoriz(10, 0) / (aHoriz(6, 0) + aHoriz(7, 0) + aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-
-    aHoriz(11, 1) = aHoriz(11, 0) / (aHoriz(11, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-    aHoriz(12, 1) = aHoriz(12, 0) / (aHoriz(12, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-    aHoriz(13, 1) = aHoriz(13, 0) / (aHoriz(13, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-
-    ' ----------------- LEFT --------------------
-    'title without box
-    If aOptions(4) = True And aOptions(5) = False And oOldChart.HasTitle = True Then
-        tProps.Title.Size.Left = oOldChart.ChartTitle.Left
+        'legend
+        If oOldChart.HasLegend = True Then
+            tProps.Legend.Size.Top = 25
+            tProps.Legend.Size.Height = 40
+            tProps.PlotArea.Size.Top = 60
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 50
+        Else
+            tProps.PlotArea.Size.Top = 37
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 30
+        End If
 
     End If
 
-    'title into box
+    'title present and in text box
     If aOptions(4) = True And aOptions(5) = True Then
-        tProps.Title.Size.Left = tProps.With * aHoriz(0, 1) / 100
-        tProps.Title.Size.With = tProps.With * aHoriz(1, 1) / 100
+
+        tProps.Title.Position = MyPosition.Top
+        tProps.Title.Size.Top = 0
+        tProps.Title.Size.Height = 35
+        tProps.Title.Size.With = tProps.With
+
+        'legend
+        If oOldChart.HasLegend = True Then
+
+            tProps.Legend.Size.Top = 35
+            tProps.Legend.Size.Height = 40
+            tProps.PlotArea.Size.Top = 70
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 60
+
+        Else
+            tProps.PlotArea.Size.Top = 37
+            tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 30
+        End If
     End If
 
-    tProps.Legend.Size.Left = tProps.With * aHoriz(3, 1) / 100
-    tProps.Legend.Size.With = tProps.With * aHoriz(4, 1) / 100
+    'source box
+    If aOptions(6) = True Then
+        tProps.SourceTextBox.Size.Top = 350
+        tProps.SourceTextBox.Size.Height = 20
+        tProps.Legend.Size.Height = tProps.Legend.Size.Height - 10
+        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 15
+    End If
 
-    tProps.PlotArea.Size.Left = tProps.With * (aHoriz(6, 1) + aHoriz(7, 1)) / 100
-    tProps.PlotArea.Size.With = tProps.With * aHoriz(8, 1) / 100
+    ' ==================== Vertical alignment =======================
+    tProps.PlotArea.Size.Left = 3
+    tProps.PlotArea.Size.With = 203
+    tProps.Legend.Size.Left = 3
+    tProps.Legend.Size.With = 203
+    tProps.SourceTextBox.Size.Left = 3
+    tProps.SourceTextBox.Size.With = 203
 
-    tProps.SourceTextBox.Size.Left = tProps.With * aHoriz(11, 0) / 100
-    tProps.SourceTextBox.Size.With = tProps.With * aHoriz(12, 0) / 100
+    If tProps.NumberOfAxesTitles(0) > 0 And tProps.NumberOfAxesTitles(1) = 0 Then
+        tProps.PlotArea.Size.Left = 10
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 5
+    End If
 
+    If tProps.NumberOfAxesTitles(0) = 0 And tProps.NumberOfAxesTitles(1) > 0 Then
+        tProps.PlotArea.Size.Left = 3
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 10
+    End If
 
-    '    ' ----------------- HEIGHT --------------------
-    '    'initial height
-    '    tProps.Title.Size.Height = tProps.Height * 0.144
-    '    tProps.Legend.Size.Height = tProps.Height * 0.18
-    '    tProps.SourceTextBox.Size.Height = tProps.Height * 0.144
-    '    tProps.Title.Position = MyPosition.Top
-    '
-    '    'title
-    '    If aOptions(4) = False Then
-    '        tProps.Title.Size.Height = 0
-    '        tProps.Title.Position = MyPosition.None
-    '    End If
-    '
-    '    'source
-    '    If aOptions(6) = False Then
-    '        tProps.SourceTextBox.Size.Height = 0
-    '        tProps.SourceTextBox.TextAlignment = msoAlignRight
-    '    End If
-    '
-    '    'legend
-    '    If oOldChart.HasLegend = False Then
-    '       tProps.Legend.Size.Height = 0
-    '    End If
-    '
-    '    'plot area
-    '    tProps.PlotArea.Size.Height = tProps.Height - tProps.Title.Size.Height - tProps.Legend.Size.Height - tProps.Height * tProps.NumberOfAxesTitles(2) * 0.07 - tProps.Height * tProps.NumberOfAxesTitles(3) * 0.07 - tProps.Height * 0.08
-    '
-    '     ' ----------------- TOP --------------------
-    '     tProps.Title.Size.Top = 0
-    '     tProps.PlotArea.Size.Top = tProps.Height * 0.32 + tProps.Height * tProps.NumberOfAxesTitles(3) * 0.07
-    '     tProps.Legend.Size.Top = tProps.Height * 0.144
-    '     tProps.SourceTextBox.Size.Top = tProps.Height * 0.95
-    '
-    '    ' ----------------- LEFT --------------------
-    '    tProps.Title.Size.Left = 0
-    '    tProps.PlotArea.Size.Left = tProps.With * 0.01 + tProps.With * tProps.NumberOfAxesTitles(0) * 0.03
-    '    tProps.Legend.Size.Left = tProps.With * 0.01
-    '    tProps.SourceTextBox.Size.Left = tProps.With * 0.01
-    '
-    '    ' ----------------- WITH --------------------
-    '     tProps.Title.Size.With = tProps.With
-    '     tProps.PlotArea.Size.With = tProps.With - tProps.With * tProps.NumberOfAxesTitles(0) * 0.03 - tProps.With * tProps.NumberOfAxesTitles(1) * 0.03 - tProps.With * 0.03
-    '     tProps.Legend.Size.With = tProps.With - tProps.With * 0.03
-    '     tProps.SourceTextBox.Size.With = tProps.With - tProps.With * 0.03
+    If tProps.NumberOfAxesTitles(0) > 0 And tProps.NumberOfAxesTitles(1) > 0 Then
+        tProps.PlotArea.Size.Left = 10
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 20
+    End If
 
-
-    '
-    '    'TitleTop = True
-    '    If aOptions(4) = True Then
-    '        tProps.Title.Position = MyPosition.Top
-    '        tProps.Title.Size.Top = 0
-    '        tProps.Title.Size.Left = 0
-    '        tProps.Title.Size.Height = tProps.Height * 0.144
-    '        tProps.Title.Size.With = tProps.With
-    '
-    '        tProps.Legend.Size.Top = tProps.Height * 0.14
-    '        tProps.Legend.Size.Height = tProps.Height * 0.18
-    '        tProps.Legend.Size.With = tProps.With
-    '    Else
-    '        tProps.Title.Position = MyPosition.None
-    '        tProps.Legend.Size.Top = 0
-    '        tProps.Legend.Size.Height = tProps.Height * 0.18
-    '        tProps.Legend.Size.With = tProps.With
-    '    End If
-    '
-    '    If aOptions(6) = True Then
-    '        tProps.SourceTextBox.Size.Top = tProps.Height - tProps.Height * 0.1
-    '        tProps.SourceTextBox.Size.Height = tProps.Height * 0.1
-    '        tProps.SourceTextBox.Size.With = tProps.With
-    '        tProps.SourceTextBox.TextAlignment = msoAlignLeft
-    '    Else
-    '        tProps.SourceTextBox.Size.Top = 0
-    '        tProps.SourceTextBox.Size.Height = 0
-    '        tProps.SourceTextBox.Size.With = 0
-    '        tProps.SourceTextBox.TextAlignment = msoAlignLeft
-    '    End If
-    '
-    '    tProps.PlotArea.Size.Top = tProps.Title.Size.Height + tProps.Legend.Size.Height
-    '    tProps.PlotArea.Size.Height = tProps.Height - tProps.Title.Size.Height - tProps.Legend.Size.Height - tProps.SourceTextBox.Size.Height
-    '
-    '    ' Vertial axes titles
-    '    If tProps.NumberOfAxesTitles(0) = 0 And tProps.NumberOfAxesTitles(1) = 0 Then
-    '
-    '        tProps.PlotArea.Size.Left = 0
-    '        tProps.PlotArea.Size.With = tProps.With - 3
-    '
-    '    ElseIf tProps.NumberOfAxesTitles(0) = 1 And tProps.NumberOfAxesTitles(1) = 0 Then
-    '
-    '        tProps.PlotArea.Size.Left = 12
-    '        tProps.PlotArea.Size.With = tProps.With - 12
-    '
-    '    ElseIf tProps.NumberOfAxesTitles(0) = 1 And tProps.NumberOfAxesTitles(1) = 1 Then
-    '
-    '        tProps.PlotArea.Size.Left = 12
-    '        tProps.PlotArea.Size.With = tProps.With - 30
-    '
-    '    End If
-    '
-    '    ' Horizontal axes titles
-    '    If tProps.NumberOfAxesTitles(2) = 0 And tProps.NumberOfAxesTitles(3) = 0 Then
-    '
-    '        tProps.PlotArea.Size.Top = tProps.PlotArea.Size.Top
-    '        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 12
-    '
-    '    ElseIf tProps.NumberOfAxesTitles(2) = 1 And tProps.NumberOfAxesTitles(3) = 0 Then
-    '
-    '        tProps.PlotArea.Size.Top = tProps.PlotArea.Size.Top - 12
-    '        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 12
-    '
-    '    End If
 
     SmallChartSize = tProps
 
@@ -691,140 +534,76 @@ Private Function LargeChartSize(props As MyChart) As MyChart
     tProps.With = 830
     tProps.ColumnWith = 120
 
-    Dim aVert(11, 2) As Variant
-    aVert(0, 0) = 0  'marging to separate chart border and title (% of chart total height)
-    aVert(1, 0) = 7 'title relative height (% of chart total height)
-    aVert(2, 0) = 0  'marging to separate title and axis title on top (% of chart total height)
-    aVert(3, 0) = 5  'axis title on top plot area(% of chart total height)
-    aVert(4, 0) = 59 'plot area relative height (% of chart total height)
-    aVert(5, 0) = 5  'axis title on bottom of plot area (% of chart total height)
-    aVert(6, 0) = 0  'marging to separate axis title on bottom and legend (% of chart total height)
-    aVert(7, 0) = 10 'legend height (% of chart total height)
-    aVert(8, 0) = 0  'marging to separate legend and source box (% of chart total height)
-    aVert(9, 0) = 7  'source box height (% of chart total height)
-    aVert(10, 0) = 3 'marging to separate source box chart border (% of chart total height)
-
     tProps.Title.Position = MyPosition.Top
     tProps.SourceTextBox.TextAlignment = msoAlignLeft
 
+    tProps.PlotArea.Size.Top = 10
+    tProps.PlotArea.Size.Height = 350
+
+    ' ==================== Horizontal alignment =======================
     'title missing
     If aOptions(4) = False Then
-        aVert(0, 0) = 0
-        aVert(1, 0) = 0
         tProps.Title.Position = MyPosition.None
+        tProps.Title.Size.Height = 0
     End If
 
-    'title not in text box
+    'title present but not in text box
     If aOptions(4) = True And aOptions(5) = False Then
-        aVert(0, 0) = 2
-        aVert(1, 0) = 5
+        tProps.Title.Position = MyPosition.Top
+        tProps.Title.Size.Top = 10
+        tProps.Title.Size.Height = 70
+        tProps.PlotArea.Size.Top = 40
+        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 40
+    End If
+
+    'title present and in text box
+    If aOptions(4) = True And aOptions(5) = True Then
+        tProps.Title.Position = MyPosition.Top
+        tProps.Title.Size.Top = 0
+        tProps.Title.Size.Height = 50
+        tProps.Title.Size.Left = 0
+        tProps.Title.Size.With = tProps.With
+        tProps.PlotArea.Size.Top = 65
+        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 55
     End If
 
     'legend
-    If oOldChart.HasLegend = False Then
-        aVert(7, 0) = 0
-        aVert(6, 0) = 0
+    If oOldChart.HasLegend = True Then
+        tProps.Legend.Size.Top = 290
+        tProps.Legend.Size.Height = 70
+        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 60
     End If
 
-    'source
-    If aOptions(6) = False Then
-        aVert(8, 0) = 0
-        aVert(9, 0) = 0
+    'source box
+    If aOptions(6) = True Then
+        tProps.SourceTextBox.Size.Top = 350
+        tProps.SourceTextBox.Size.Height = 20
+        tProps.Legend.Size.Height = tProps.Legend.Size.Height - 10
+        tProps.PlotArea.Size.Height = tProps.PlotArea.Size.Height - 10
     End If
 
-    aVert(3, 0) = aVert(3, 0) * tProps.NumberOfAxesTitles(2)
-    aVert(5, 0) = aVert(5, 0) * tProps.NumberOfAxesTitles(3)
+    ' ==================== Vertical alignment =======================
+    tProps.PlotArea.Size.Left = 5
+    tProps.PlotArea.Size.With = 810
+    tProps.Legend.Size.Left = 5
+    tProps.Legend.Size.With = 810
+    tProps.SourceTextBox.Size.Left = 5
+    tProps.SourceTextBox.Size.With = 810
 
-    aVert(0, 1) = aVert(0, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(1, 1) = aVert(1, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(2, 1) = aVert(2, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(3, 1) = aVert(3, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(4, 1) = aVert(4, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(5, 1) = aVert(5, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(6, 1) = aVert(6, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(7, 1) = aVert(7, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(8, 1) = aVert(8, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(9, 1) = aVert(9, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-    aVert(10, 1) = aVert(10, 0) / (aVert(0, 0) + aVert(1, 0) + aVert(2, 0) + aVert(3, 0) + aVert(4, 0) + aVert(5, 0) + aVert(6, 0) + aVert(7, 0) + aVert(8, 0) + aVert(9, 0) + aVert(10, 0)) * 100
-
-    aVert(1, 2) = aVert(0, 1) 'title
-    aVert(4, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1) + aVert(3, 0) 'plot area
-    aVert(7, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1) + aVert(3, 1) + aVert(4, 1) + aVert(5, 1) + aVert(6, 1)  'legend
-    aVert(9, 2) = aVert(0, 1) + aVert(1, 1) + aVert(2, 1) + aVert(3, 1) + aVert(4, 1) + aVert(5, 1) + aVert(6, 1) + aVert(7, 1) + aVert(8, 1) 'source
-
-    ' ----------------- HEIGHT --------------------
-    tProps.Title.Size.Height = tProps.Height * aVert(1, 1) / 100
-    tProps.PlotArea.Size.Height = tProps.Height * aVert(4, 1) / 100
-    tProps.Legend.Size.Height = tProps.Height * aVert(7, 1) / 100
-    tProps.SourceTextBox.Size.Height = tProps.Height * aVert(9, 1) / 100
-
-    ' ----------------- TOP --------------------
-    tProps.Title.Size.Top = tProps.Height * aVert(1, 2) / 100
-    tProps.PlotArea.Size.Top = tProps.Height * aVert(4, 2) / 100
-    tProps.Legend.Size.Top = tProps.Height * aVert(7, 2) / 100
-    tProps.SourceTextBox.Size.Top = tProps.Height * aVert(9, 2) / 100
-
-    Dim aHoriz(14, 2) As Variant
-    aHoriz(0, 0) = 0  'marging to separate chart title form left border (% of chart total with)
-    aHoriz(1, 0) = 100  'title relative with (% of chart total with)
-    aHoriz(2, 0) = 0  'marging to separate title from right border (% of chart total with)
-
-    aHoriz(3, 0) = 1   'marging to separate axis title on left border(% of chart total with)
-    aHoriz(4, 0) = 3   'marging to separate axis title from plot area (% of chart total with)
-    aHoriz(5, 0) = 87  'plot area with (% of chart total with)
-    aHoriz(6, 0) = 0  'marging to separate plot area from axis title (% of chart total with)
-    aHoriz(7, 0) = 3   'marging to separate axis title on left border(% of chart total with)
-
-    aHoriz(8, 0) = 1   'marging to separate legend from left border (% of chart total with)
-    aHoriz(9, 0) = 98  'legend with (% of chart total with)
-    aHoriz(10, 0) = 1  'marging to separate legend from right border (% of chart total with)
-
-    aHoriz(11, 0) = 1  'marging to separate legend from left border (% of chart total with)
-    aHoriz(12, 0) = 98 'legend with (% of chart total with)
-    aHoriz(13, 0) = 1  'marging to separate legend from right border (% of chart total with)
-
-    aHoriz(4, 0) = aHoriz(4, 0) * tProps.NumberOfAxesTitles(0)
-    aHoriz(6, 0) = aHoriz(6, 0) * tProps.NumberOfAxesTitles(1)
-
-    aHoriz(0, 1) = aHoriz(0, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-    aHoriz(1, 1) = aHoriz(1, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-    aHoriz(2, 1) = aHoriz(2, 0) / (aHoriz(0, 0) + aHoriz(1, 0) + aHoriz(2, 0)) * 100
-
-    aHoriz(3, 1) = aHoriz(3, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0) + aHoriz(6, 0) + aHoriz(7, 0)) * 100
-    aHoriz(4, 1) = aHoriz(4, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0) + aHoriz(6, 0) + aHoriz(7, 0)) * 100
-    aHoriz(5, 1) = aHoriz(5, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0) + aHoriz(6, 0) + aHoriz(7, 0)) * 100
-    aHoriz(6, 1) = aHoriz(6, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0) + aHoriz(6, 0) + aHoriz(7, 0)) * 100
-    aHoriz(7, 1) = aHoriz(7, 0) / (aHoriz(3, 0) + aHoriz(4, 0) + aHoriz(5, 0) + aHoriz(6, 0) + aHoriz(7, 0)) * 100
-
-    aHoriz(8, 1) = aHoriz(8, 0) / (aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(9, 1) = aHoriz(9, 0) / (aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-    aHoriz(10, 1) = aHoriz(10, 0) / (aHoriz(8, 0) + aHoriz(9, 0) + aHoriz(10, 0)) * 100
-
-    aHoriz(11, 1) = aHoriz(11, 0) / (aHoriz(11, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-    aHoriz(12, 1) = aHoriz(12, 0) / (aHoriz(12, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-    aHoriz(13, 1) = aHoriz(13, 0) / (aHoriz(13, 0) + aHoriz(12, 0) + aHoriz(13, 0)) * 100
-
-    ' ----------------- LEFT --------------------
-    'title without box
-    If aOptions(4) = True And aOptions(5) = False And oOldChart.HasTitle = True Then
-        tProps.Title.Size.Left = oOldChart.ChartTitle.Left
-
+    If tProps.NumberOfAxesTitles(0) > 0 And tProps.NumberOfAxesTitles(1) = 0 Then
+        tProps.PlotArea.Size.Left = 20
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 20
     End If
 
-    'title into box
-    If aOptions(4) = True And aOptions(5) = True Then
-        tProps.Title.Size.Left = tProps.With * aHoriz(0, 1) / 100
-        tProps.Title.Size.With = tProps.With * aHoriz(1, 1) / 100
+    If tProps.NumberOfAxesTitles(0) = 0 And tProps.NumberOfAxesTitles(1) > 0 Then
+        tProps.PlotArea.Size.Left = 5
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 20
     End If
 
-    tProps.PlotArea.Size.Left = tProps.With * (aHoriz(3, 1) + aHoriz(4, 1)) / 100
-    tProps.PlotArea.Size.With = tProps.With * aHoriz(5, 1) / 100
-
-    tProps.Legend.Size.Left = tProps.With * aHoriz(8, 1) / 100
-    tProps.Legend.Size.With = tProps.With * aHoriz(9, 1) / 100
-
-    tProps.SourceTextBox.Size.Left = tProps.With * aHoriz(11, 0) / 100
-    tProps.SourceTextBox.Size.With = tProps.With * aHoriz(12, 0) / 100
+    If tProps.NumberOfAxesTitles(0) > 0 And tProps.NumberOfAxesTitles(1) > 0 Then
+        tProps.PlotArea.Size.Left = 25
+        tProps.PlotArea.Size.With = tProps.PlotArea.Size.With - 40
+    End If
 
     LargeChartSize = tProps
 
@@ -835,29 +614,6 @@ Public Function GetSeriesColors() As Variant
     GetSeriesColors = aSeriesColors
 
 End Function
-
-
-'Private Function NumberOfYAxisTitles() As Integer
-'
-'    Dim Counter As Integer
-'    Counter = 0
-'
-'    Dim ax As axis
-'
-'    For Each ax In oOldChart.Axes
-'
-'        If ax.Type = xlValue And ax.HasTitle = True Then
-'
-'            Counter = Counter + 1
-'
-'        End If
-'
-'    Next ax
-'
-'    NumberOfYAxisTitles = Counter
-'
-'End Function
-
 
 
 

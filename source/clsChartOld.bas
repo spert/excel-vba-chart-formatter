@@ -17,11 +17,10 @@ Private bMultipleAxesGroups As Boolean
 
 Private bIsValidExcelChart As Boolean
 
-Public Sub Initiate(OldChart As Chart, ChartProps As MyChart)
+Public Sub Initiate(OldChart As Chart)
   
   Set oOldChart = OldChart
-  tChartProps = ChartProps
-    bMultipleAxesGroups = False
+  bMultipleAxesGroups = False
 
 End Sub
 
@@ -42,6 +41,13 @@ Public Property Get GetOldChart() As Chart
     Set GetOldChart = oOldChart
 
 End Property
+
+Public Property Get IsMultipleAxisGroups() As Boolean
+
+   IsMultipleAxisGroups = bMultipleAxesGroups
+
+End Property
+
 
 Public Sub ValidateExcelChart()
 
@@ -100,7 +106,7 @@ Public Sub CollectSeries()
           Set serS = oOldChart.SeriesCollection(i)
           
          Set clsMySeries = New clsSeries
-         Call clsMySeries.Initiate(serS, oOldChart, tChartProps)
+         Call clsMySeries.Initiate(serS, oOldChart)
 
         If (Not arrMySeries) = -1 Then
 
@@ -151,7 +157,7 @@ Public Sub CollectAxes()
         arrCat(5) = arrMySeries(i).GetMySources(2, 5)
 
     Set clsMyAxis = New clsAxes
-    Call clsMyAxis.Initialize(arrCat, tChartProps)
+    Call clsMyAxis.Initialize(arrCat)
 
         If clsMyAxis.IsEmptyAxis() Then
 
@@ -202,7 +208,6 @@ NextIteration:
 ErrorHandler:
 
     ErrorMod.ErrorMessage cProc, cModule
-
 
 End Sub
 

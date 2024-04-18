@@ -38,6 +38,7 @@ Public Sub ModifyChartTitle()
 
         oMyChart.HasTitle = True
         oMyChart.ChartTitle.Text = tChartProps.Title.Text
+        'oMyChart.ChartTitle.Top = tChartProps.Title.Size.Top
 
     End If
 
@@ -49,6 +50,9 @@ Public Sub ModifyChartTitle()
         fHeading.TextFrame2.TextRange.Text = tChartProps.Title.Text
 
     End If
+
+
+
 
     Exit Sub
 

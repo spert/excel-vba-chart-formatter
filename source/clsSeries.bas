@@ -13,12 +13,11 @@ Private shtNewWorkSheet As Worksheet
 Private iColumn As Integer
 Private bIsValidSeries As Boolean
 
-Public Sub Initiate(ExcelSeries As Series, OldChart As Chart, ChartProps As MyChart)
+Public Sub Initiate(ExcelSeries As Series, OldChart As Chart)
   
   Set oSeries = ExcelSeries
   Set oOldChart = OldChart
-  tChartProps = ChartProps
-    arrSources = SplitFormula(ExcelSeries)
+  arrSources = SplitFormula(ExcelSeries)
     xlsAxisGroup = ExcelSeries.AxisGroup
 
 
@@ -47,6 +46,13 @@ Public Property Let SetColumn(Column As Integer)
         iColumn = Column
         
 End Property
+
+Public Property Let SetChartProps(ChartProps As MyChart)
+
+   tChartProps = ChartProps
+
+End Property
+
 
 Public Property Get IsValidSeries() As Boolean
 
@@ -199,7 +205,6 @@ ErrorHandler:
 
 End Sub
 
-
 Public Sub PrintSeriesValues()
 
     Const cProc = "PrintSeriesValues"
@@ -208,11 +213,44 @@ Public Sub PrintSeriesValues()
 
     Dim r As Range
     Set r = Range(arrSources(3, 5))
-    
+
     Call FormatRange(r)
 
     r = arrSources(3, 3)
     r.NumberFormat = arrSources(3, 4)
+
+    Exit Sub
+
+ErrorHandler:
+
+    ErrorMod.ErrorMessage cProc, cModule
+
+End Sub
+
+
+Public Sub PrintSeriesValuesAsLinks()
+
+    Const cProc = "PrintSeriesValuesAsLinks"
+
+    On Error GoTo ErrorHandler
+
+    Dim rSource As Range
+    Set rSource = Range(arrSources(3, 2)) 'source
+   
+    Dim rTarget As Range
+    Set rTarget = Range(arrSources(3, 5)) 'target
+    Call FormatRange(rTarget)
+    rTarget.NumberFormat = arrSources(3, 4)
+
+    Dim c As Integer
+    Dim sSource As String
+
+    For c = 1 To rSource.Cells.count
+
+        sSource = "='" & rSource(c).Parent.Name & "'!" & rSource(c).Address(External:=False)
+        rTarget.Cells(c).Formula = sSource
+
+    Next
 
     Exit Sub
 

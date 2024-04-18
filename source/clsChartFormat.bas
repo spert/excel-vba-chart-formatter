@@ -68,9 +68,12 @@ Public Sub FormatChartTitleBox()
     fTitleBox.TextFrame2.MarginBottom = 2.8346456693
     fTitleBox.TextFrame2.WordWrap = True
     fTitleBox.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = tChartProps.Title.Font.RGB
-    fTitleBox.IncrementTop -3.75
+    fTitleBox.Width = tChartProps.Title.Size.With
+    fTitleBox.Height = tChartProps.Title.Size.Height
+    fTitleBox.Top = tChartProps.Title.Size.Top
+    fTitleBox.IncrementTop -3.75 'order matters
 
-      Exit Sub
+    Exit Sub
 
 ErrorHandler:
 
@@ -103,7 +106,7 @@ Public Sub FormatSourceTextBox()
     fSources.TextFrame2.TextRange.Font.Name = tChartProps.SourceTextBox.Font.Name
     fSources.TextFrame2.TextRange.ParagraphFormat.Alignment = tChartProps.SourceTextBox.TextAlignment
 
-    fSources.OLEFormat.Object.Formula = sFormula
+    'fSources.OLEFormat.Object.Formula = sFormula
 
     Exit Sub
 ErrorHandler:
@@ -321,6 +324,10 @@ Public Sub FormatLegend()
     Const cProc = "FormatLegend"
 
     On Error GoTo ErrorHandler
+
+    If oMyChart.HasLegend = False Then
+        Exit Sub
+    End If
 
     oMyChart.HasLegend = True
     oMyChart.Legend.Left = tChartProps.Legend.Size.Left
