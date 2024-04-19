@@ -6,13 +6,28 @@ Const cModule = "clsChartModify"
 
 Private oMyChart As Chart
 
+Private arrMySeries() As clsSeries
+
+Private arrMyAxes() As clsAxes
+
 Private tChartProps As MyChart
 
 
-Public Sub Initiate(MyChart As Chart, ChartProps As MyChart)
-  
-  Set oMyChart = MyChart
-  tChartProps = ChartProps
+Public Sub InitiateFromOld(OldChart As clsChartOld, ChartProps As MyChart)
+
+  Set oMyChart = OldChart.GetOldChart
+  arrMyAxes() = OldChart.GetMyAxes
+    arrMySeries() = OldChart.GetMySeries
+    tChartProps = ChartProps
+
+End Sub
+
+Public Sub InitiateFromNew(NewChart As clsChartNew, ChartProps As MyChart)
+
+  Set oMyChart = NewChart.GetNewChart
+  arrMySeries() = NewChart.GetMySeries
+    arrMyAxes() = NewChart.GetMyAxes
+    tChartProps = ChartProps
 
 End Sub
 
@@ -21,7 +36,7 @@ Public Sub ModifyChartTitle()
 
     Const cProc = "ModifyChartTitle"
 
-    ' On Error GoTo ErrorHandler:
+    On Error GoTo ErrorHandler
 
     Dim sh As Shape
     For Each sh In oMyChart.Shapes
@@ -50,8 +65,6 @@ Public Sub ModifyChartTitle()
         fHeading.TextFrame2.TextRange.Text = tChartProps.Title.Text
 
     End If
-
-
 
 
     Exit Sub
@@ -90,5 +103,60 @@ Public Sub ModifySourceBox()
 ErrorHandler:
 
     ErrorMod.ErrorMessage cProc, cModule
+
+End Sub
+
+
+Public Sub RescaleXAxis()
+
+    Const cProc = "RescaleXAxis"
+
+    Dim i As Integer
+    Dim tNewDateScale As MyNewDateScale
+    Dim tMyAxis As clsAxes
+
+    On Error GoTo ErrorHandler
+
+    If tChartProps.ChartNeedsRescaling And oMyChart.HasAxis(xlValue, xlPrimary) = True Then
+
+        Dim ax As axis
+        Set ax = oMyChart.Axes(xlCategory, xlPrimary)
+             
+        If IsDateAxis(ax) Then
+
+            For i = 1 To UBound(arrMySeries)
+
+                If arrMySeries(i).GetSeriesAxisGroup = XlAxisGroup.xlPrimary And Not arrMySeries(i).GetSeriesAxis Is Nothing Then
+
+                    Call arrMySeries(i).GetSeriesAxis.Rescale
+                    tNewDateScale = arrMySeries(i).GetSeriesAxis.GetMyNewDateScale
+
+                    If tNewDateScale.Rescaled = True Then
+
+                        ax.MinimumScale = tNewDateScale.MinDate
+                        ax.MaximumScale = tNewDateScale.MaxDate
+                        ax.MajorUnit = tNewDateScale.MajorUnit
+                        ax.MajorUnitScale = tNewDateScale.MajorUnitScale
+                        'ax.BaseUnit = tNewDateScale.BaseUnit 'BUG: base unit shall remain unchanged
+                        ax.TickLabels.NumberFormat = tNewDateScale.FormatCode
+
+                    End If
+
+
+                End If
+
+            Next
+
+        End If
+
+    End If
+
+
+    Exit Sub
+
+ErrorHandler:
+
+    ErrorMod.ErrorMessage cProc, cModule
+
 
 End Sub

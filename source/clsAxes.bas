@@ -10,10 +10,9 @@ Private tMyNewDateScale As MyNewDateScale
 Const cModule = "clsAxes"
 
 
-Public Sub Initialize(CategoryValues As Variant, ChartProps As MyChart)
+Public Sub Initialize(CategoryValues As Variant)
 
     arrCat = CategoryValues
-    tChartProps = ChartProps
 
 End Sub
 
@@ -119,6 +118,12 @@ Public Property Let SetNewWorkSheet(NewWorkSheet As Worksheet)
 
 End Property
 
+Public Property Let SetChartProps(ChartProps As MyChart)
+
+   tChartProps = ChartProps
+
+End Property
+
 
 Public Sub SetNewCategoryRange()
 
@@ -137,6 +142,43 @@ Public Sub SetNewCategoryRange()
     Set r = firstCell.Resize(UBound(arrCat(3)), 1)
             
     arrCat(5) = r.Address(, , , True)
+
+    Exit Sub
+
+ErrorHandler:
+
+    ErrorMod.ErrorMessage cProc, cModule
+
+End Sub
+
+
+Public Sub PrintCategoryValuesAsLinks()
+
+    Const cProc = "PrintCategoryValuesAsLinks"
+
+    On Error GoTo ErrorHandler
+
+    If IsEmpty(arrCat(5)) Then
+        Exit Sub
+    End If
+
+    Dim rTarget As Range
+    Set rTarget = Range(arrCat(5))
+    Call FormatRange(rTarget)
+    rTarget.NumberFormat = arrCat(4)
+
+    Dim rSource As Range
+    Set rSource = Range(arrCat(2))
+    
+    Dim i As Integer
+    Dim sSource As String
+
+    For i = 1 To rSource.Cells.count
+
+        sSource = "='" & rSource(i).Parent.Name & "'!" & rSource(i).Address(0, 0)
+        rTarget.Cells(i).Formula = sSource
+
+    Next
 
     Exit Sub
 
@@ -200,7 +242,7 @@ End Sub
 
 Public Sub Rescale()
 
-    Const cProc = "RescaleDateAxis"
+    Const cProc = ""
 
     tMyNewDateScale = CalculateNewScale(arrCat(3))
 
