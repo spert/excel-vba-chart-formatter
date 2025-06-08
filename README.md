@@ -1,29 +1,68 @@
 # Excel VBA Chart Formatter
-The VBA code in this repository makes Excel charts pretty. Formatted charts are suitable for publications and presentations.
 
-Preparing Excel charts for regular publications and presentations is a tedious and time consuming task. Excel spreadsheets may contain raw data and calculations which would be irrelevat to other colleaques and editors. The purpose of VBA code in this repository is to automate the routine editorial process. The program copies the data of an arbitrary Excel chart to a new spreadsheet and applies formatting procedures. One may choose to create two copies of the underlying Excel chart for multiple language purposes. There is also an option to decide between two chart sizes: the small one and the large one suitable for Power-Point presentations. Additionally, the user may opt to plot the chart title inside of a text box, have a standard Excel chart title or proceed without a title.
+The VBA code in this repository helps make Excel charts visually appealing—ideal for publications and presentations.
 
-Please note that the application is designed to prettify simple chart types like line charts and column charts. This program may fail in case of complex chart types like pies, radars, scatter plots etc.        
+---
+
+## Overview
+
+Preparing Excel charts for regular publications or presentations can be tedious and time-consuming. Spreadsheets often contain raw data and calculations that are irrelevant to colleagues or editors. This VBA tool automates the routine editorial process of chart formatting.
+
+The program:
+
+- Copies the data from any selected Excel chart to a new worksheet
+- Applies consistent formatting automatically
+- Allows the creation of one or two chart copies (e.g., for multilingual use)
+- Offers two size options: small (e.g., for print) or large (presentation-ready)
+- Supports different title placements: inside a text box, as a standard chart title, or with no title
+
+> ⚠️ **Note:** This tool is designed to prettify **simple chart types** (e.g., _line_ and _column_ charts). It may not work correctly with **complex chart types** such as _pie charts_, _radar charts_, or _scatter plots_.
+
+---
 
 ## Usage
-* Activate the Excel chart that shall to be prettified (click once on surface of the chart area) 
-* Click on 'Format chart' menu button on 'Add-ins' menubar of an Excel spreadsheet
-![img1.png](images/img1.png)
-* Accept all messages on trust settings that may appear  
-* This will open up an user form. You may apply the desired properties of formatting
-![img2.png](images/img2.png)
-* Press 'Execute' button to start formatting
-* A new spreadsheet with formatted copy (or two copies) of the chart will be created 
-* The data of the underlying chart will also be available on the new spreadsheet
-![img4.png](images/img4.png)
 
-## Installation 
-* Dowload the Excel add-in from this github repository     
-* Open an Excel spreadsheet 
-* Double click on ChartFormatter.xlam file in the "Install" folder  
+1. **Activate the chart**  
+   Click once on the surface of the Excel chart you want to prettify.
 
-## Technical info  
-* VBA code is packed into a .xlam file
-* Principles of object-oriented programming were applied by using VBA classes, types, collections etc.   
-* The program has been tested on Excel 2016 Professional Plus version  
-* Read the license requirements (GPLV3) before modifying the source code
+2. **Click 'Format chart'**  
+   Go to the **Add-ins** menu bar in Excel and click the **Format chart** button.  
+   ![Chart Formatter Button](images/img1.png)
+
+3. **Accept trust prompts**  
+   Accept any messages related to macro or trust settings.
+
+4. **Customize formatting**  
+   A user form will open. Choose your preferred formatting options.  
+   ![User Form](images/img2.png)
+
+5. **Click 'Execute'**  
+   Press the **Execute** button to start formatting.
+
+6. **View the output**  
+   A new worksheet will be created, containing:
+   - The formatted chart (or two copies if selected)
+   - The cleaned and copied chart data  
+   ![Formatted Output](images/img4.png)
+
+---
+
+## Installation
+
+1. Download the Excel add-in file (`ChartFormatter.xlam`) from this repository.
+2. Open any Excel workbook.
+3. Double-click the `ChartFormatter.xlam` file located in the `Install` folder to load the add-in.
+
+---
+
+## Technical Info
+
+- The VBA code is compiled into a `.xlam` Excel Add-in file.
+- Object-oriented programming principles are applied using VBA **classes**, **types**, and **collections**.
+- Tested on **Excel 2016 Professional Plus**.
+- Licensed under **GPLv3**. Please review the license terms before modifying or distributing the source code.
+
+---
+
+Let me know if you want this styled for GitHub Pages, added to a GitHub project, or converted to a downloadable .md file.
+
