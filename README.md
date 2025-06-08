@@ -64,5 +64,5 @@ The program:
 
 ---
 
-Let me know if you want this styled for GitHub Pages, added to a GitHub project, or converted to a downloadable .md file.
+
 
